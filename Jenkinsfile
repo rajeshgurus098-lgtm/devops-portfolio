@@ -1,20 +1,20 @@
 pipeline {
     agent any
- 
+
     environment {
         AWS_REGION = 'eu-north-1'
         AWS_ACCOUNT_ID = '510724490791'
         REPOSITORY_NAME = 'devopsportfolio'
     }
- 
+
     stages {
- 
+
         stage('Clone') {
             steps {
                 checkout scm
             }
         }
- 
+
         stage('Build Docker Image') {
             steps {
                 bat '''
@@ -22,7 +22,7 @@ pipeline {
                 '''
             }
         }
- 
+
         stage('Login ECR') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-ecr-creds']]) {
@@ -34,7 +34,7 @@ pipeline {
                 }
             }
         }
- 
+
         stage('Tag Image') {
             steps {
                 bat '''
@@ -42,11 +42,20 @@ pipeline {
                 '''
             }
         }
- 
+
         stage('Push Image') {
             steps {
                 bat '''
                 docker push %AWS_ACCOUNT_ID%.dkr.ecr.%AWS_REGION%.amazonaws.com/%REPOSITORY_NAME%:latest
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                bat '''
+                docker rm -f devops-portfolio-site 2>nul
+                docker run -d -p 8081:80 --name devops-portfolio-site %AWS_ACCOUNT_ID%.dkr.ecr.%AWS_REGION%.amazonaws.com/%REPOSITORY_NAME%:latest
                 '''
             }
         }
