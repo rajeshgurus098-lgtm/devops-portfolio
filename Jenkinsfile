@@ -4,7 +4,7 @@ pipeline {
     environment {
         AWS_REGION = 'eu-north-1'
         AWS_ACCOUNT_ID = '510724490791'
-        REPOSITORY_NAME = 'devops-portfolio'
+        REPOSITORY_NAME = 'devopsportfolio'
     }
  
     stages {
